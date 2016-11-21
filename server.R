@@ -6,10 +6,30 @@ library(shiny)
 library(leaflet)
 library(htmltools)
 library(rsconnect)
-rsconnect::deployApp('C:/Users/JCFunk/Documents/GitHub/Taller_Integra_lV')
 
-
+rsconnect::deployApp("C:/Users/JCFunk/Documents/GitHub/Taller_Integra_lV")
 datos <- data.frame(read.csv("Datos/escuelasFinal.csv"))
+
+####################################################################################################
+
+lat1 <- -38.70891
+lat2 <- -38.75835
+lat3 <- -38.74019
+lon1 <- -72.62492
+lon2 <- -72.62233
+lon3 <- -72.65103  
+
+lat=c(lat1,lat2,lat3)
+long=c(lon1,lon2,lon3)
+
+leaflet(datos) %>% addTiles() %>% 
+  setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
+  addPolygons(~long,~lat)
+
+###################################################################################################
+
+
+
 
 
 
@@ -21,8 +41,10 @@ shinyServer(function(input, output,session) {
     
     leaflet(datos) %>% addTiles() %>% 
       setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
-      #addCircleMarkers(lng = -(runif(500,72.5,72.8)), -(runif(500,38.6,38.76)), popup = ~htmlEscape("Dario Montiel"),color="RED")%>%
-      addMarkers(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
+      #addCircleMarkers(lng = -(runif(500,72.5,72.8)), -(runif(500,38.6,38.76)),color="BLUE")%>%
+      #addPolygons(~Longitud, ~Latitud)%>%
+      addCircles(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
+      
 
   })
   
@@ -30,11 +52,28 @@ shinyServer(function(input, output,session) {
     
     output$mymap <- renderLeaflet({
       # definir el objeto de mapa
-      
+      cx<-  genEst(nest,182,posEsc[1:182,],cupo[1:182],dist95=0.006)
       leaflet(datos) %>% addTiles() %>% 
         setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
-        addCircleMarkers(lng = -(runif(500,72.5,72.8)), -(runif(500,38.6,38.76)), popup = ~htmlEscape("Dario Montiel"),color="RED")%>%
-        addMarkers(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
+        #addPolygons(lng=-lon1, lat= -lat1 , popup = ~htmlEscape("Dario Montiel"),color="RED")%>%
+        addCircleMarkers(radius = 1.5, lng =cx[1:nest,2],cx[1:nest,1], popup = ~htmlEscape("sss"),color="RED")%>%
+        addCircles(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
+      
+    })
+    
+  })
+  
+  observeEvent(input$button1, {
+    
+    output$mymap <- renderLeaflet({
+      # definir el objeto de mapa
+      cx<-  genEst(nest,182,posEsc[1:182,],cupo[1:182],dist95=0.006)
+      leaflet(datos) %>% addTiles() %>% 
+        setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
+        #addPolygons(lng=-lon1, lat= -lat1 , popup = ~htmlEscape("Dario Montiel"),color="RED")%>%
+        addCircleMarkers(radius = 1.5, lng =cx[1:nest,2],cx[1:nest,1], popup = ~htmlEscape("sss"),color="RED")%>%
+        addPolygons(~long,~lat,color="Green")%>%
+        addCircles(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
       
     })
     
@@ -56,7 +95,7 @@ shinyServer(function(input, output,session) {
     
     ggplot()+
       geom_line(aes(x=t,y=minS),col="darkgreen")+
-      geom_hline(yintercept=S(masCerca),col="black",lty=2)
+      geom_hline(yintercept=S(masCerca,nesc,vuln,nest,P),col="black",lty=2)
     
   })
   
@@ -65,7 +104,7 @@ shinyServer(function(input, output,session) {
     
     ggplot()+
       geom_line(aes(x=t,y=vmeanCostCupo),col="darkgreen")+
-      geom_hline(yintercept=costCupo(masCerca),col="black",lty=2)
+      geom_hline(yintercept=costCupo(masCerca,nesc,cupo),col="black",lty=2)
     
   })
   
@@ -74,16 +113,39 @@ shinyServer(function(input, output,session) {
     
     ggplot()+
       geom_line(aes(x=t,y=vmeanDist),col="darkgreen")+
-      geom_hline(yintercept=meanDist(masCerca),col="black",lty=2)
+      geom_hline(yintercept=meanDist(masCerca,dist),col="black",lty=2)
     
   })
   
-  output$plot5 <- renderPlot({
-    input$newplot
-   
-  
-
+  output$plot6 <- renderPlot({
+    result <- input$result
+    n <- input$n
+    
+    hist(data(), 
+         main=paste('resultadoPrueba', result, '(', n, ')', sep=''))
   })
+  
+  output$table <- renderTable({
+    data.frame(x=data())
+  })
+  
+  
+  data <- reactive({
+    result <- switch(input$result,
+                   esc = rnorm,
+                   est = runif)
+    result(input$n)
+  })
+  
+  output$descarga <- downloadHandler(
+    filename = function() {
+      paste("SinNombre-", Sys.Date(), ".csv", sep="")
+    },
+    content = function(file) {
+      write.csv(datos, file)
+    }
+  )
+
   
   output$prueba <- DT::renderDataTable({
     

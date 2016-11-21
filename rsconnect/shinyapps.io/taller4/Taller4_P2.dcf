@@ -2,9 +2,6 @@ name: Taller4_P2
 account: taller4
 server: shinyapps.io
 appId: 138939
-bundleId: 620498
+bundleId: 620509
 url: https://taller4.shinyapps.io/Taller4_P2/
-when: 1479707799.98958
-asMultiple: FALSE
-asStatic: FALSE
-ignoredFiles: README.md|Datos/escuelas.csv|Datos/NivelDependencia.csv|Datos/REGION.csv|Recursos/Algo_Gen_3.R|Recursos/excelTOcsv.R|Recursos/LeerDatosExcel.R|Recursos/poligono.R|Recursos/scrip.sql|Recursos/Taller_v7.rar
+when: 1479709549.45938

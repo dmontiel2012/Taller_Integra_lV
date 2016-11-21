@@ -22,7 +22,9 @@ shinyUI(fluidPage(
                                     width = 600, height = 560,
                                     
                                     leafletOutput("mymap",width = 600, height = 560),
-                                    actionButton("button", "General Estudiantes")
+                                    actionButton("button", "General Estudiantes"),
+                                    actionButton("button1", "General Polgonos"),
+                                    downloadButton("descarga", "Descargar")
                                     
                                     
                                     ),
@@ -40,8 +42,8 @@ shinyUI(fluidPage(
                                     plotOutput("plot", height=300),
                                     plotOutput("plot2", height=300),
                                     plotOutput("plot3", height=300),
-                                    plotOutput("plot4", height=300),
-                                    plotOutput("plot5", height=300)
+                                    plotOutput("plot4", height=300)
+                                    #plotOutput("plot5", height=300)
                                     )),
                       tags$div(id="cite",
                                'Prueba Texto ', tags$em('Proyecto: Taller de integracion 4'), ' Por Juan Carlos Vergara (Taller 4, 2015).'
@@ -54,7 +56,32 @@ shinyUI(fluidPage(
              DT::dataTableOutput("prueba")
   ),
   
+  tabPanel("Resultados",
+  hr(),
+  sidebarPanel(
+    radioButtons("result", "Distribucion:",
+                 c("Escuelas" = "esc",
+                   "Estudiantes" = "est"
+                   )),
+    br(),
+    
+    sliderInput("n", 
+                "Numero Iteraciones:", 
+                value = 500,
+                min = 1, 
+                max = 1000)
+  ),
+  
+  mainPanel(
+    tabsetPanel(type = "tabs", 
+                tabPanel("Plot", plotOutput("plot6")),
+                tabPanel("Tabla", tableOutput("table"))
+    ))
+  
+  ),
+    
   conditionalPanel("false", icon("crosshair"))
+
   
   )
 ))
