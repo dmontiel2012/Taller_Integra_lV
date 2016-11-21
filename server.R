@@ -9,7 +9,8 @@ library(rsconnect)
 rsconnect::deployApp('C:/Users/JCFunk/Documents/GitHub/Taller_Integra_lV')
 
 
-datos <- data.frame(read.csv("C:/Users/JCFunk/Documents/GitHub/Taller_Integra_lV/Datos/escuelasFinal.csv"))
+datos <- data.frame(read.csv("Datos/escuelasFinal.csv"))
+
 
 
 ## renderLeaflet() se utiliza del lado del servidor para hacer el mapa
@@ -86,7 +87,7 @@ shinyServer(function(input, output,session) {
   
   output$prueba <- DT::renderDataTable({
     
-    datos <- read.csv("C:/Users/JCFunk/Documents/GitHub/Taller_Integra_lV/Datos/escuelasFinal.csv")
+    datos <- read.csv("Datos/escuelasFinal.csv")
     datos
     
   })
