@@ -4,6 +4,9 @@ library(parallel)
 library(deldir)
 library(animation)
 library(Rcpp)
+
+datos <- data.frame(read.csv("C:/Users/JCFunk/Documents/GitHub/Taller_Integra_lV/Datos/escuelasFinal.csv"))
+
 calcDist<-function(ests,escs){
   return(outer(1:nest,1:nesc,function(i,j) sqrt(rowSums((ests[i,]-escs[j,])^2))))
 }
