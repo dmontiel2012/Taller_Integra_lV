@@ -8,7 +8,7 @@ library(xlsx)
 library(htmltools)
 
 
-datos <- data.frame(read.csv("escuelasFinal.csv"))
+datos <- data.frame(read.csv("Datos/escuelasFinal.csv"))
 
 
 ## renderLeaflet() se utiliza del lado del servidor para hacer el mapa
