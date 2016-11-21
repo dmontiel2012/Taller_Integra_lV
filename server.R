@@ -7,10 +7,8 @@ library(leaflet)
 library(xlsx)
 library(htmltools)
 
-#datos <- data.frame(read.xlsx("C:/Users/JCFunk/Downloads/Colegios Temuco.xlsx", sheetName = "Hoja1"))
-#datos
 
-datos <- data.frame(read.csv("C:/Users/JCFunk/Downloads/escuelasFinal.csv"))
+datos <- data.frame(read.csv("escuelasFinal.csv"))
 
 
 ## renderLeaflet() se utiliza del lado del servidor para hacer el mapa
