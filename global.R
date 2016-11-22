@@ -9,6 +9,24 @@ library(RColorBrewer)
 #lectura de archivo
 datos <- data.frame(read.csv("Datos/escuelasFinal.csv"))
 
+jmax<-20000
+kmax<-2000000
+######
+# Definici?n de Poblaci?n
+######
+#nest<-1000
+nesc<-20
+escuelas<-1:nesc
+#nest<-round(20000/12)
+nest<-round(1000)
+
+#Posicion de las escuelas, reales.
+posEscuela<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
+
+
+posEsc<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
+cupo<-abs(round(rnorm(nesc,(nest/nesc),1.5*(nest/nesc))))+10
+
 
 calcDist<-function(ests,escs){
   return(outer(1:nest,1:nesc,function(i,j) sqrt(rowSums((ests[i,]-escs[j,])^2))))
@@ -57,6 +75,29 @@ distancia<-function(lt1,lg1,lt2,lg2){
   
 }
 
+genCirc<-function(n,pos,sdx,sdy){
+  #  browser()
+  xpos<-rnorm(n,pos$X,sdx)
+  ypos<-rnorm(n,pos$Y,sdx)
+  return(cbind(X=xpos,Y=ypos))
+}
+
+
+genEst<-function(nest,nesc,posEsc,cupo,dist95=0.006){
+  #popEst<-matrix(0,nrow = nest,ncol=2)
+  #colnames(popEst)<-c("X","Y")
+  cupo2<-round(nest*cupo/sum(cupo))
+  popEst<-genCirc(cupo2[1],posEsc[1,],dist95/2,dist95/2)
+  for(i in 2:nesc){
+    popEst<-rbind(popEst,genCirc(cupo2[i],posEsc[i,],dist95/2,dist95/2))
+  }
+  return(popEst)
+}
+
+
+#Posicion Estudiantes
+posEstudiantes<-genEst(nest,nesc,posEscuela[1:nesc,],cupo[1:nesc],dist95=0.006)
+
 distEntre<-function(nest,nesc,posEstudiantes,posEscuelas,cupo){
   #browser()
   distances<- c()
@@ -78,23 +119,8 @@ distEntre<-function(nest,nesc,posEstudiantes,posEscuelas,cupo){
 
 DistAluEsc<-distEntre(nest,nesc,posEstudiantes,posEscuela,cupo)
 
-genEst<-function(nest,nesc,posEsc,cupo,dist95=0.006){
-  #popEst<-matrix(0,nrow = nest,ncol=2)
-  #colnames(popEst)<-c("X","Y")
-  cupo2<-round(nest*cupo/sum(cupo))
-  popEst<-genCirc(cupo2[1],posEsc[1,],dist95/2,dist95/2)
-  for(i in 2:nesc){
-    popEst<-rbind(popEst,genCirc(cupo2[i],posEsc[i,],dist95/2,dist95/2))
-  }
-  return(popEst)
-}
 
-genCirc<-function(n,pos,sdx,sdy){
-  #  browser()
-  xpos<-rnorm(n,pos$X,sdx)
-  ypos<-rnorm(n,pos$Y,sdx)
-  return(cbind(X=xpos,Y=ypos))
-}
+
 
 
 
@@ -386,11 +412,7 @@ plot.esc<-function(cromosoma,escuelas,color=T){
   p
 }
 
-#Posicion de las escuelas, reales.
-posEscuela<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
 
-#Posicion Estudiantes
-posEstudiantes<-genEst(nest,nesc,posEscuela[1:nesc,],cupo[1:nesc],dist95=0.006)
 ###Parte 2
 ###########
 
@@ -407,14 +429,14 @@ nesc<-20
 escuelas<-1:nesc
 #nest<-round(20000/12)
 nest<-round(1000)
-#escX<-runif(nesc,0,7.5)
-#escY<-runif(nesc,0,7.5)
-#posEsc<-as.data.frame(cbind(X=escX,Y=escY))
 posEsc<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
 cupo<-abs(round(rnorm(nesc,(nest/nesc),1.5*(nest/nesc))))+10
+
 if(sum(cupo)<1.25*nest){
   cupo<-round(cupo/(sum(cupo)/(1.25*nest)))
 }
+
+
 #posEst<-genEst(nest,nesc,posEsc,cupo,5)
 posEst<-genEst(nest,nesc,posEscuela[1:nesc,],cupo[1:nesc],dist95=0.006)
 nest<-nrow(posEst)
