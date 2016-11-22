@@ -4,13 +4,10 @@ library(parallel)
 library(deldir)
 library(animation)
 library(Rcpp)
+library(RColorBrewer)
 #----------------------------------
 #lectura de archivo
 datos <- data.frame(read.csv("Datos/escuelasFinal.csv"))
-#Posicion de las escuelas, reales.
-posEscuela<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
-#Posicion Estudiantes
-posEstudiantes<-genEst(nest,nesc,posEscuela[1:nesc,],cupo[1:nesc],dist95=0.006)
 
 
 calcDist<-function(ests,escs){
@@ -81,13 +78,6 @@ distEntre<-function(nest,nesc,posEstudiantes,posEscuelas,cupo){
 
 DistAluEsc<-distEntre(nest,nesc,posEstudiantes,posEscuela,cupo)
 
-genCirc<-function(n,pos,sdx,sdy){
-  #  browser()
-  xpos<-rnorm(n,pos$X,sdx)
-  ypos<-rnorm(n,pos$Y,sdx)
-  return(cbind(X=xpos,Y=ypos))
-}
-
 genEst<-function(nest,nesc,posEsc,cupo,dist95=0.006){
   #popEst<-matrix(0,nrow = nest,ncol=2)
   #colnames(popEst)<-c("X","Y")
@@ -98,6 +88,15 @@ genEst<-function(nest,nesc,posEsc,cupo,dist95=0.006){
   }
   return(popEst)
 }
+
+genCirc<-function(n,pos,sdx,sdy){
+  #  browser()
+  xpos<-rnorm(n,pos$X,sdx)
+  ypos<-rnorm(n,pos$Y,sdx)
+  return(cbind(X=xpos,Y=ypos))
+}
+
+
 
 Sesc<-function(cromosoma,esc){
   #  browser()
@@ -335,7 +334,7 @@ calcPmut<-function(cromA,cromB,pmin,pmax,t){
 
 plot.esc<-function(cromosoma,escuelas,color=T){
   # browser()
-  require(RColorBrewer)
+  k<-0
   cromosoma_orig<-cromosoma
   cualesEsc<-as.numeric(names(table(cromosoma))) #identificar escuelas abiertas
   #  cromosoma<-cromosomas[[1]]
@@ -387,6 +386,11 @@ plot.esc<-function(cromosoma,escuelas,color=T){
   p
 }
 
+#Posicion de las escuelas, reales.
+posEscuela<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
+
+#Posicion Estudiantes
+posEstudiantes<-genEst(nest,nesc,posEscuela[1:nesc,],cupo[1:nesc],dist95=0.006)
 ###Parte 2
 ###########
 
