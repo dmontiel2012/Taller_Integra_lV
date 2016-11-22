@@ -27,6 +27,7 @@ shinyUI(fluidPage(
                                     downloadButton("descarga", "Descargar")
                                     
                                     
+                                    
                                     ),
                       
                       
@@ -75,7 +76,8 @@ shinyUI(fluidPage(
   mainPanel(
     tabsetPanel(type = "tabs", 
                 tabPanel("Plot", plotOutput("plot6")),
-                tabPanel("Tabla", tableOutput("table"))
+                tabPanel("Tabla", tableOutput("table")),
+                tabPanel("Distanias", tableOutput("tableDist"))
     ))
   
   ),

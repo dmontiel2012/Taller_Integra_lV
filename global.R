@@ -4,18 +4,81 @@ library(parallel)
 library(deldir)
 library(animation)
 library(Rcpp)
-
+#----------------------------------
+#lectura de archivo
 datos <- data.frame(read.csv("Datos/escuelasFinal.csv"))
+#Posicion de las escuelas, reales.
+posEscuela<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
+#Posicion Estudiantes
+posEstudiantes<-genEst(nest,nesc,posEscuela[1:nesc,],cupo[1:nesc],dist95=0.006)
+
 
 calcDist<-function(ests,escs){
   return(outer(1:nest,1:nesc,function(i,j) sqrt(rowSums((ests[i,]-escs[j,])^2))))
 }
 
-f3<-function(lt1,lg1,lt2,lg2){
+# aca las distanciass
+calculoDist<-function(nest,nesc){
+  dis<-matrix(data = NA,nrow=nest, ncol = nesc, byrow = FALSE, dimnames = NULL ) 
+  for(i in 1:nest){
+    for(j in 1:nesc){
+      dis[i,j]<-((sqrt((((2-1)^2)+((2-1)^2))/2))*157.48)
+      
+    }
+    
+  }
+  return (dis)  
+}
+
+cppFunction('NumericMatrix calculodist( DataFrame posEstudiantes, DataFrame posEscuela,int nest,int nesc ){
+            
+            NumericMatrix asx(nest,nesc);
+            float lt1,lt2,lg1,lg2,z;
+            NumericMatrix posEstu = internal::convert_using_rfunction(posEstudiantes, "as.matrix");
+            NumericMatrix posEsc = internal::convert_using_rfunction(posEscuela, "as.matrix");
+            for(int i=0; i < nest; i++){ 
+            for(int j=0; j< nesc; j++){
+            lt1 =posEstu(i,0);
+            lg1= posEstu(i,1);
+            lt2= posEsc(j,0);
+            lg2= posEsc(j,1);
+            z= (pow((lt1-lt2),2))+(pow((lg1-lg2),2));
+            z = sqrt(z/2)*157.48;
+            asx(i,j)= z;
+            
+            }            
+            }
+            
+            return asx;
+            }')
+
+
+#distancia entre pos geografico
+distancia<-function(lt1,lg1,lt2,lg2){
   
   return((sqrt((((lt1-lt2)^2)+((lg1-lg2)^2))/2))*157.48)
   
 }
+
+distEntre<-function(nest,nesc,posEstudiantes,posEscuelas,cupo){
+  #browser()
+  distances<- c()
+  escuela <- c()
+  estudiante <-c()
+  cupo2<-round(nest*cupo/sum(cupo))
+  l<-1
+  for(i in 1:nesc){
+    for (j in 1:cupo2[i]){
+      escuela[l]<-i
+      estudiante[l]<-l
+      distances[l]<-distancia(posEstudiantes[j,1],posEstudiantes[j,2],posEscuelas[i,1],posEscuelas[i,2])    
+      l<-l+1
+    }
+  }
+  MatrizDatos<-as.data.frame(cbind(Estudiante=estudiante,Escuela=escuela,Distancia=distances)) 
+  return(MatrizDatos)
+}
+
 
 genCirc<-function(n,pos,sdx,sdy){
   #  browser()
@@ -24,7 +87,7 @@ genCirc<-function(n,pos,sdx,sdy){
   return(cbind(X=xpos,Y=ypos))
 }
 
-genEst<-function(nest,nesc,posEsc,cupo,dist95=6){
+genEst<-function(nest,nesc,posEsc,cupo,dist95=0.006){
   #popEst<-matrix(0,nrow = nest,ncol=2)
   #colnames(popEst)<-c("X","Y")
   cupo2<-round(nest*cupo/sum(cupo))
@@ -106,7 +169,7 @@ cppFunction('float S(NumericVector cromosoma,int nesc,NumericVector vuln,int nes
             ')
 
 #__________________________________________________________________________________________
-#meanDist<-function(cromosoma){
+#meanDist2<-function(cromosoma){
 # return(mean(unlist(mclapply(1:length(cromosoma), function(i) {
 #    return(dist[i,cromosoma[i]])
 #  }, mc.cores=1))))
@@ -267,6 +330,8 @@ calcPmut<-function(cromA,cromB,pmin,pmax,t){
   return(min(pmax,max(pmin,p-fact)))
 }
 
+
+
 plot.esc<-function(cromosoma,escuelas,color=T){
   # browser()
   require(RColorBrewer)
@@ -301,8 +366,8 @@ plot.esc<-function(cromosoma,escuelas,color=T){
   posEstEsc$Esc<-factor(posEstEsc$Esc,escuelas)
   posEsci$id<-factor(posEsci$id,escuelas)
   myColors <- brewer.pal(n = 8,name = "Dark2")
-  names(myColors) <- levels(posEsci$id)
-  
+  #names(myColors) <- levels(posEsci$id)
+  names(myColors) <- levels(myColors)
   p<-ggplot()
   p<-p+geom_polygon(data=findhull,aes(x=X,y=Y,fill=Esc),alpha=0.1)
   p<-p+geom_polygon(data=findhull,aes(x=X,y=Y,col=Esc),alpha=0)
@@ -315,11 +380,14 @@ plot.esc<-function(cromosoma,escuelas,color=T){
   p<-p+scale_fill_manual(values=myColors)
   p<-p+geom_point(data=posEstEsc,aes(x=X,y=Y,color=Esc,shape=Vuln),size=3)
   p<-p+theme(legend.position="bottom",legend.box="horizontal")
-  p<-p+annotate("text",label=paste("t=",k," - S=",round(S(cromosoma),3),sep=""),
+  p<-p+annotate("text",label=paste("t=",k," - S=",round(S(cromosoma,nesc,vuln,nest,P),3),sep=""),
                 x=min(posEstEsc$X),y=min(posEstEsc$Y),size=3,hjust = 0)
   if(!color) p<-p+scale_color_grey()+scale_fill_grey()
   p
 }
+
+###Parte 2
+###########
 
 num_cores <- detectCores()
 cl <- makeCluster(num_cores)
@@ -330,21 +398,23 @@ kmax<-2000000
 # Definici?n de Poblaci?n
 ######
 #nest<-1000
-nesc<-182
+nesc<-20
 escuelas<-1:nesc
 #nest<-round(20000/12)
 nest<-round(1000)
-escX<-runif(nesc,0,7.5)
-escY<-runif(nesc,0,7.5)
+#escX<-runif(nesc,0,7.5)
+#escY<-runif(nesc,0,7.5)
 #posEsc<-as.data.frame(cbind(X=escX,Y=escY))
 posEsc<-as.data.frame(cbind(X=datos[1:nesc,2],Y=datos[1:nesc,3]))
 cupo<-abs(round(rnorm(nesc,(nest/nesc),1.5*(nest/nesc))))+10
 if(sum(cupo)<1.25*nest){
   cupo<-round(cupo/(sum(cupo)/(1.25*nest)))
 }
-posEst<-genEst(nest,nesc,posEsc,cupo,5)
+#posEst<-genEst(nest,nesc,posEsc,cupo,5)
+posEst<-genEst(nest,nesc,posEscuela[1:nesc,],cupo[1:nesc],dist95=0.006)
 nest<-nrow(posEst)
-dist<-calcDist(posEst,posEsc)
+#dist<-calcDist(posEst,posEsc)
+dist<-calculodist(posEst,posEsc,nest,nesc)
 #dist<-matrix(round(runif(nesc*nest,0,10),2),nrow = nest)
 
 #vuln<-sample(0:1,nest,replace = T)
@@ -528,3 +598,8 @@ points(posEsc2, pch=21, col=escuelas, cex=2)
 points(posEsc, pch=22, col=escuelas, cex=2)
 plot(vtess, wlines="tess", wpoints="none", number=FALSE, add=TRUE, lty=1)
 points(posEst,col=cromosoma,pch=1+vuln,cex=0.5)
+
+
+
+
+

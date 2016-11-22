@@ -1,3 +1,4 @@
+
 ############################################################################################################
 ############################################################################################################
 
@@ -28,9 +29,6 @@ leaflet(datos) %>% addTiles() %>%
 
 
 
-
-
-
 ## renderLeaflet() se utiliza del lado del servidor para hacer el mapa
 
 shinyServer(function(input, output,session) {
@@ -39,10 +37,7 @@ shinyServer(function(input, output,session) {
     
     leaflet(datos) %>% addTiles() %>% 
       setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
-      #addCircleMarkers(lng = -(runif(500,72.5,72.8)), -(runif(500,38.6,38.76)),color="BLUE")%>%
-      #addPolygons(~Longitud, ~Latitud)%>%
-      addCircles(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
-      
+      addMarkers(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
 
   })
   
@@ -50,7 +45,7 @@ shinyServer(function(input, output,session) {
     
     output$mymap <- renderLeaflet({
       # definir el objeto de mapa
-      cx<-  genEst(nest,182,posEsc[1:182,],cupo[1:182],dist95=0.006)
+      cx<-  genEst(nest,nesc,posEsc[1:nesc,],cupo[1:nesc],dist95=0.006)
       leaflet(datos) %>% addTiles() %>% 
         setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
         #addPolygons(lng=-lon1, lat= -lat1 , popup = ~htmlEscape("Dario Montiel"),color="RED")%>%
@@ -65,7 +60,7 @@ shinyServer(function(input, output,session) {
     
     output$mymap <- renderLeaflet({
       # definir el objeto de mapa
-      cx<-  genEst(nest,182,posEsc[1:182,],cupo[1:182],dist95=0.006)
+      cx<-  genEst(nest,nesc,posEsc[1:nesc,],cupo[1:nesc],dist95=0.006)
       leaflet(datos) %>% addTiles() %>% 
         setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
         #addPolygons(lng=-lon1, lat= -lat1 , popup = ~htmlEscape("Dario Montiel"),color="RED")%>%
@@ -76,6 +71,8 @@ shinyServer(function(input, output,session) {
     })
     
   })
+  
+  
   
   output$plot <- renderPlot({
     input$newplot
@@ -130,9 +127,13 @@ shinyServer(function(input, output,session) {
   
   data <- reactive({
     result <- switch(input$result,
-                   esc = rnorm,
-                   est = runif)
+                     esc = rnorm,
+                     est = runif)
     result(input$n)
+  })
+  
+  output$tableDist <- renderTable({
+    DistAluEsc
   })
   
   output$descarga <- downloadHandler(
@@ -143,7 +144,7 @@ shinyServer(function(input, output,session) {
       write.csv(datos, file)
     }
   )
-
+  
   
   output$prueba <- DT::renderDataTable({
     
