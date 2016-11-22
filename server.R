@@ -1,13 +1,11 @@
-
 ############################################################################################################
 ############################################################################################################
 
 library(shiny)
 library(leaflet)
 library(htmltools)
-library(rsconnect)
 
-rsconnect::deployApp("C:/Users/JCFunk/Documents/GitHub/Taller_Integra_lV")
+
 datos <- data.frame(read.csv("Datos/escuelasFinal.csv"))
 
 ####################################################################################################
