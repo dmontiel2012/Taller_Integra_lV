@@ -112,6 +112,29 @@ shinyServer(function(input, output,session) {
     
   })
   
+  
+  output$plot5 <- renderPlot({
+    input$newplot
+    
+    plot(posEst,type="n",xlim=range(posEst[,1]),ylim=range(posEst[,2]))
+    points(posEsc, pch=21, col=escuelas, cex=2)
+    plot(vtess, wlines="tess", wpoints="none", number=FALSE, add=TRUE, lty=1)
+    points(posEst,col=masCerca,pch=1+vuln,cex=0.5)
+    
+  })
+  
+  output$plot7 <- renderPlot({
+    input$newplot
+    
+    plot(posEst,type="n",xlim=range(posEst2[,1]),ylim=range(posEst2[,2]))
+    points(posEsc2, pch=21, col=escuelas, cex=2)
+    points(posEsc, pch=22, col=escuelas, cex=2)
+    plot(vtess, wlines="tess", wpoints="none", number=FALSE, add=TRUE, lty=1)
+    points(posEst,col=cromosoma,pch=1+vuln,cex=0.5)
+    
+  })
+  
+  
   output$plot6 <- renderPlot({
     result <- input$result
     n <- input$n

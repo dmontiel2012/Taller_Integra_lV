@@ -43,8 +43,10 @@ shinyUI(fluidPage(
                                     plotOutput("plot", height=300),
                                     plotOutput("plot2", height=300),
                                     plotOutput("plot3", height=300),
-                                    plotOutput("plot4", height=300)
-                                    #plotOutput("plot5", height=300)
+                                    plotOutput("plot4", height=300),
+                                    plotOutput("plot5", height=300),
+                                    plotOutput("plot7", height=300)
+                                    
                                     )),
                       tags$div(id="cite",
                                'Prueba Texto ', tags$em('Proyecto: Taller de integracion 4'), ' Por Juan Carlos Vergara (Taller 4, 2015).'
