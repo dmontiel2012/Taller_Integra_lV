@@ -79,6 +79,7 @@ distEntre<-function(nest,nesc,posEstudiantes,posEscuelas,cupo){
   return(MatrizDatos)
 }
 
+DistAluEsc<-distEntre(nest,nesc,posEstudiantes,posEscuela,cupo)
 
 genCirc<-function(n,pos,sdx,sdy){
   #  browser()

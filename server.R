@@ -37,7 +37,7 @@ shinyServer(function(input, output,session) {
     
     leaflet(datos) %>% addTiles() %>% 
       setView(lng = -72.5845, lat = -38.7338, zoom = 12) %>%
-      addMarkers(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
+      addCircles(~Longitud, ~Latitud, popup = ~htmlEscape(Nombres))
 
   })
   
